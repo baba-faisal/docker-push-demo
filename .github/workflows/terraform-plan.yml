@@ -9,6 +9,7 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
 
+    # Expose the variables globally to the shell so the provider reads them directly
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -19,17 +20,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # FIX: Disable the wrapper that forces the az login script redirection
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
 
-      # FIX: Explicitly pass the SP secrets to the backend initialization process
       - name: Terraform Init
-        run: |
-          terraform init -input=false \
-            -backend-config="client_id=${{ secrets.ARM_CLIENT_ID }}" \
-            -backend-config="client_secret=${{ secrets.ARM_CLIENT_SECRET }}" \
-            -backend-config="tenant_id=${{ secrets.ARM_TENANT_ID }}" \
-            -backend-config="subscription_id=${{ secrets.ARM_SUBSCRIPTION_ID }}"
+        run: terraform init -input=false
 
       - name: Terraform Plan
         run: terraform plan -input=false -no-color
