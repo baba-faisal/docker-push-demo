@@ -10,3 +10,4 @@ resource "local_file" "demo" {
   content  = "This is a test file created by Terraform"
   filename = "${path.module}/test-output.txt"
 }
+# Test comment
